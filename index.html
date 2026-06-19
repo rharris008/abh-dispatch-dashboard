@@ -1,4 +1,207 @@
-<!DOCTYPE html><html><head><title>ABH Dispatch Board</title></head>
-<body style="font-family:Arial;text-align:center;padding:60px;color:#1B2A4A;">
-<h1>ABH Dispatch Board</h1><p>First refresh in progress. Check back in a few minutes.</p>
-</body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ABH Dispatch Board</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f0f2f5;color:#333;font-size:13px}
+a{text-decoration:none;color:inherit}
+
+.header{background:#1B2A4A;color:#fff;padding:14px 24px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:18px;font-weight:bold}
+.header .sub{font-size:11px;opacity:.6;margin-top:4px}
+.header .refresh{text-align:right;font-size:11px;opacity:.75}
+
+.summary{background:#0E7CCE;color:#fff;padding:12px 24px;display:flex;gap:28px;align-items:center;flex-wrap:wrap}
+.kpi{text-align:center;min-width:70px}
+.kpi-val{font-size:22px;font-weight:bold;line-height:1}
+.kpi-lbl{font-size:10px;opacity:.8;margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
+.divider{width:1px;background:rgba(255,255,255,.3);height:40px}
+.sku-tile{padding:5px 12px;border-radius:4px;text-align:center;min-width:80px}
+.sku-tile-name{font-size:10px;opacity:.85;text-transform:uppercase}
+.sku-tile-value{font-size:18px;font-weight:bold}
+.sku-tile-sub{font-size:10px;opacity:.75}
+.sku-tile.dim{opacity:.4}
+
+.nav-bar{background:#fff;border-bottom:2px solid #e0e0e0;padding:0 24px;display:flex;overflow-x:auto;gap:0;position:sticky;top:0;z-index:100}
+.nav-link{padding:10px 14px;font-size:12px;font-weight:bold;color:#666;border-bottom:3px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.nav-link:hover{color:#1B2A4A;border-bottom-color:#1B2A4A}
+.nav-badge{border-radius:10px;padding:1px 7px;font-size:10px;font-weight:bold;background:#1B2A4A;color:#fff}
+.nav-badge.empty{background:#ccc;color:#fff}
+.nav-badge.active{background:#27AE60}
+
+.week-divider{margin:20px 24px 4px;font-size:11px;font-weight:bold;color:#888;text-transform:uppercase;letter-spacing:.5px;border-top:1px solid #ddd;padding-top:12px}
+
+.day-section{margin:12px 24px;border-radius:6px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.day-header{background:#1B2A4A;color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.day-header.today{background:#0E7CCE}
+.day-header.tomorrow{background:#27AE60}
+.day-title{font-weight:bold;font-size:14px}
+.day-summary{font-size:12px;opacity:.85}
+.day-empty{background:#fff;padding:14px 16px;color:#999;font-style:italic}
+
+.so-card{background:#fff;border-top:1px solid #eee}
+.so-header{background:#f4f7fb;padding:8px 16px;display:flex;gap:14px;align-items:center;border-bottom:1px solid #e4e4e4;flex-wrap:wrap}
+.so-num{font-weight:bold;color:#1B2A4A;font-size:13px}
+.so-customer{color:#333}
+.so-meta{color:#777;font-size:12px}
+.so-carrier{color:#999;font-size:12px;margin-left:auto}
+
+.so-table{width:100%;border-collapse:collapse}
+.so-table th{background:#e8ecf0;color:#555;padding:6px 16px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.3px}
+.so-table td{padding:7px 16px;border-top:1px solid #f0f0f0}
+.so-table .r{text-align:right}
+.so-total{background:#f4f7fb;font-weight:bold;color:#1B2A4A}
+
+.sku-cell{font-weight:bold;font-size:12px}
+.sku-navy{background:#1B2A4A;color:#fff;padding:4px 16px}
+.sku-blue{background:#0E7CCE;color:#fff;padding:4px 16px}
+.sku-green{background:#27AE60;color:#fff;padding:4px 16px}
+.sku-amber{background:#E67E22;color:#fff;padding:4px 16px}
+.sku-red{background:#C0392B;color:#fff;padding:4px 16px}
+.sku-grey{background:#999;color:#fff;padding:4px 16px}
+
+.legend{display:flex;gap:8px;padding:10px 24px;background:#fff;border-top:1px solid #e0e0e0;flex-wrap:wrap;align-items:center}
+.legend-lbl{font-size:11px;color:#888;margin-right:4px}
+.legend-item{padding:3px 10px;border-radius:3px;font-size:11px;font-weight:bold;color:#fff}
+
+.footer{text-align:center;color:#aaa;font-size:11px;padding:20px 24px;background:#fff;margin-top:16px;border-top:1px solid #ddd}
+
+@media(max-width:600px){
+  .day-section{margin:8px 0;border-radius:0}
+  .summary{gap:16px}
+  .so-carrier{margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>ABH Dispatch Board</h1>
+    <div class="sub">INTERNAL &mdash; NOT FOR DISTRIBUTION &nbsp;|&nbsp; NetSuite live · Subsidiary 2</div>
+  </div>
+  <div class="refresh">Last refreshed<br><strong>19/06/2026 14:30 (SAMPLE) AEST</strong></div>
+</div>
+
+<div class="summary">
+  <div class="kpi"><div class="kpi-val">6</div><div class="kpi-lbl">Open SOs</div></div>
+  <div class="kpi"><div class="kpi-val">9,448</div><div class="kpi-lbl">Total Units</div></div>
+  <div class="kpi"><div class="kpi-val">98</div><div class="kpi-lbl">Pallets</div></div>
+  <div class="divider"></div>
+  <div class="sku-tile sku-navy"><div class="sku-tile-name">10L Cask</div><div class="sku-tile-value">60</div><div class="sku-tile-sub">5,760 units</div></div><div class="sku-tile sku-blue"><div class="sku-tile-name">5L Cask</div><div class="sku-tile-value">13</div><div class="sku-tile-sub">780 units</div></div><div class="sku-tile sku-green"><div class="sku-tile-name">2L</div><div class="sku-tile-value">10</div><div class="sku-tile-sub">640 units</div></div><div class="sku-tile sku-amber"><div class="sku-tile-name">600ml 12Pk</div><div class="sku-tile-value">12</div><div class="sku-tile-sub">1,512 units</div></div><div class="sku-tile sku-red"><div class="sku-tile-name">600ml 6Pk</div><div class="sku-tile-value">3</div><div class="sku-tile-sub">756 units</div></div>
+</div>
+
+<nav class="nav-bar">
+<a href="#2026-06-19" class="nav-link">Today 19/06<span class="nav-badge active">2</span></a>
+<a href="#2026-06-22" class="nav-link">Mon 22/06<span class="nav-badge empty">0</span></a>
+<a href="#2026-06-23" class="nav-link">Tue 23/06<span class="nav-badge active">1</span></a>
+<a href="#2026-06-24" class="nav-link">Wed 24/06<span class="nav-badge active">1</span></a>
+<a href="#2026-06-25" class="nav-link">Thu 25/06<span class="nav-badge empty">0</span></a>
+<a href="#2026-06-26" class="nav-link">↑ Next week · Fri 26/06<span class="nav-badge active">1</span></a>
+<a href="#2026-06-29" class="nav-link">Mon 29/06<span class="nav-badge empty">0</span></a>
+<a href="#2026-06-30" class="nav-link">Tue 30/06<span class="nav-badge empty">0</span></a>
+<a href="#2026-07-01" class="nav-link">Wed 01/07<span class="nav-badge empty">0</span></a>
+<a href="#2026-07-02" class="nav-link">Thu 02/07<span class="nav-badge empty">0</span></a>
+
+</nav>
+
+<div class="day-section" id="2026-06-19">
+  <div class="day-header today"><span class="day-title">Today &mdash; Friday 19 June 2026</span><span class="day-summary">2 SOs &nbsp;&bull;&nbsp; 3,912 units &nbsp;&bull;&nbsp; 40.0 pallets</span></div>
+  <div class="so-card">
+    <div class="so-header"><span class="so-num">SO12341</span><span class="so-customer">Woolworths Group Ltd</span><span class="so-meta">PO: WW-294851</span><span class="so-carrier">Toll Transport</span>    </div>
+    <table class="so-table">
+      <tr><th>Product</th><th class="r">Units</th><th class="r">Pallets</th></tr>
+      <tr><td class="sku-cell sku-navy">Pureau 10L Cask</td><td class="r">1,920</td><td class="r">20.0</td></tr>
+      <tr><td class="sku-cell sku-blue">Pureau 5L Cask</td><td class="r">480</td><td class="r">8.0</td></tr>
+      <tr class="so-total"><td>SO Total</td><td class="r">2,400</td><td class="r">28.0</td></tr>
+    </table>
+  </div>
+  <div class="so-card">
+    <div class="so-header"><span class="so-num">SO12342</span><span class="so-customer">Coles Supermarkets Australia</span><span class="so-meta">PO: CL-88421</span><span class="so-carrier">Linfox</span>    </div>
+    <table class="so-table">
+      <tr><th>Product</th><th class="r">Units</th><th class="r">Pallets</th></tr>
+      <tr><td class="sku-cell sku-amber">Pureau 600ml 12Pk</td><td class="r">1,512</td><td class="r">12.0</td></tr>
+      <tr class="so-total"><td>SO Total</td><td class="r">1,512</td><td class="r">12.0</td></tr>
+    </table>
+  </div>
+</div>
+<div class="week-divider">▸ Next week</div>
+<div class="day-section" id="2026-06-22">
+  <div class="day-header"><span class="day-title">Monday 22 June 2026</span><span class="day-summary">No dispatch scheduled</span></div>
+  <div class="day-empty">No open dispatch orders for this date.</div>
+</div>
+<div class="day-section" id="2026-06-23">
+  <div class="day-header"><span class="day-title">Tuesday 23 June 2026</span><span class="day-summary">1 SO &nbsp;&bull;&nbsp; 2,880 units &nbsp;&bull;&nbsp; 30.0 pallets</span></div>
+  <div class="so-card">
+    <div class="so-header"><span class="so-num">SO12350</span><span class="so-customer">Woolworths Group Ltd</span><span class="so-meta">PO: WW-295011</span><span class="so-carrier">Toll Transport</span>    </div>
+    <table class="so-table">
+      <tr><th>Product</th><th class="r">Units</th><th class="r">Pallets</th></tr>
+      <tr><td class="sku-cell sku-navy">Pureau 10L Cask</td><td class="r">2,880</td><td class="r">30.0</td></tr>
+      <tr class="so-total"><td>SO Total</td><td class="r">2,880</td><td class="r">30.0</td></tr>
+    </table>
+  </div>
+</div>
+<div class="day-section" id="2026-06-24">
+  <div class="day-header"><span class="day-title">Wednesday 24 June 2026</span><span class="day-summary">1 SO &nbsp;&bull;&nbsp; 756 units &nbsp;&bull;&nbsp; 3.0 pallets</span></div>
+  <div class="so-card">
+    <div class="so-header"><span class="so-num">SO12351</span><span class="so-customer">Coles Supermarkets Australia</span><span class="so-meta">PO: CL-88500</span><span class="so-carrier">Linfox</span>    </div>
+    <table class="so-table">
+      <tr><th>Product</th><th class="r">Units</th><th class="r">Pallets</th></tr>
+      <tr><td class="sku-cell sku-red">Pureau 600ml 6Pk</td><td class="r">756</td><td class="r">3.0</td></tr>
+      <tr class="so-total"><td>SO Total</td><td class="r">756</td><td class="r">3.0</td></tr>
+    </table>
+  </div>
+</div>
+<div class="day-section" id="2026-06-25">
+  <div class="day-header"><span class="day-title">Thursday 25 June 2026</span><span class="day-summary">No dispatch scheduled</span></div>
+  <div class="day-empty">No open dispatch orders for this date.</div>
+</div>
+<div class="day-section" id="2026-06-26">
+  <div class="day-header"><span class="day-title">Friday 26 June 2026</span><span class="day-summary">1 SO &nbsp;&bull;&nbsp; 300 units &nbsp;&bull;&nbsp; 5.0 pallets</span></div>
+  <div class="so-card">
+    <div class="so-header"><span class="so-num">SO12360</span><span class="so-customer">Woolworths Group Ltd</span><span class="so-meta">PO: WW-295200</span><span class="so-carrier">Toll Transport</span>    </div>
+    <table class="so-table">
+      <tr><th>Product</th><th class="r">Units</th><th class="r">Pallets</th></tr>
+      <tr><td class="sku-cell sku-blue">Pureau 5L Cask</td><td class="r">300</td><td class="r">5.0</td></tr>
+      <tr class="so-total"><td>SO Total</td><td class="r">300</td><td class="r">5.0</td></tr>
+    </table>
+  </div>
+</div>
+<div class="week-divider">▸ Next week</div>
+<div class="day-section" id="2026-06-29">
+  <div class="day-header"><span class="day-title">Monday 29 June 2026</span><span class="day-summary">No dispatch scheduled</span></div>
+  <div class="day-empty">No open dispatch orders for this date.</div>
+</div>
+<div class="day-section" id="2026-06-30">
+  <div class="day-header"><span class="day-title">Tuesday 30 June 2026</span><span class="day-summary">No dispatch scheduled</span></div>
+  <div class="day-empty">No open dispatch orders for this date.</div>
+</div>
+<div class="day-section" id="2026-07-01">
+  <div class="day-header"><span class="day-title">Wednesday 01 July 2026</span><span class="day-summary">No dispatch scheduled</span></div>
+  <div class="day-empty">No open dispatch orders for this date.</div>
+</div>
+<div class="day-section" id="2026-07-02">
+  <div class="day-header"><span class="day-title">Thursday 02 July 2026</span><span class="day-summary">No dispatch scheduled</span></div>
+  <div class="day-empty">No open dispatch orders for this date.</div>
+</div>
+
+
+<div class="legend">
+  <span class="legend-lbl">SKU key:</span>
+  <span class="legend-item" style="background:#1B2A4A">10L Cask (96/pal)</span>
+  <span class="legend-item" style="background:#0E7CCE">5L Cask (60/pal)</span>
+  <span class="legend-item" style="background:#27AE60">2L (64/pal)</span>
+  <span class="legend-item" style="background:#E67E22">600ml 12Pk (126/pal)</span>
+  <span class="legend-item" style="background:#C0392B">600ml 6Pk (252/pal)</span>
+</div>
+
+<div class="footer">
+  ABH Pureau &nbsp;|&nbsp; Dispatch Board &nbsp;|&nbsp; Generated: 19/06/2026 14:30 (SAMPLE) AEST &nbsp;|&nbsp; INTERNAL &mdash; NOT FOR DISTRIBUTION<br>
+  Auto-refreshes hourly Mon&ndash;Fri 06:00&ndash;18:00 AEST
+</div>
+
+</body>
+</html>
